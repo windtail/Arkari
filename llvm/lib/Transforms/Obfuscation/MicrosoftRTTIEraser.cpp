@@ -68,6 +68,26 @@ public:
       ) {
         continue;
       }
+      // 跨 DLL 的 dynamic_cast 靠 RTTI 名字匹配，改名与外部模块共享的类型必然失配。
+      // 配置了命名空间白名单时只动这些命名空间下的类型（自有类型，外部无副本）。
+      // getAsString() 带结尾 NUL，匹配前先去掉，否则 ends_with 永远不成立。
+      StringRef matchName = tyInfoString;
+      while (!matchName.empty() && matchName.back() == '\0') {
+        matchName = matchName.drop_back();
+      }
+      const auto &namespaces = ArgsOptions->rttiNamespaces();
+      if (!namespaces.empty()) {
+        bool matched = false;
+        for (const auto &ns : namespaces) {
+          if (matchName.ends_with("@" + ns + "@@")) {
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          continue;
+        }
+      }
       auto      newRttiName = randomRttiName(tyInfoString);
       Constant *newRttiNameConstant = ConstantDataArray::getString(
           ctx, newRttiName, newRttiName[newRttiName.size() - 1] != '\0');

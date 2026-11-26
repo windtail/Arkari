@@ -114,6 +114,17 @@ std::shared_ptr<ObfuscationOptions> ObfuscationOptions::readConfigFile(
       }
       continue;
     }
+    if (obj.getFirst().str() == "rtti") {
+      if (auto optObj = obj.getSecond().getAsObject()) {
+        if (auto namespaces = optObj->getArray("namespaces")) {
+          for (const auto &ns : *namespaces) {
+            if (auto nsStr = ns.getAsString()) {
+              result->rttiNamespaces().push_back(nsStr->str());
+            }
+          }
+        }
+      }
+    }
     bool objHit = false;
     for (auto &opt : allOpt) {
       if ((objHit = procObj(opt, obj))) {

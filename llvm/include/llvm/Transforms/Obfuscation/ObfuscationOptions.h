@@ -82,6 +82,8 @@ protected:
   std::shared_ptr<ObfOpt> RttiOpt = nullptr;
 
   SmallString<32> RandomSeed;
+  /// 只擦除这些顶层命名空间下的 RTTI 名字（空 = 不限）。
+  SmallVector<std::string> RttiNamespaces;
 
 public:
   SmallVector<std::shared_ptr<ObfOpt>> getAllOpt() const {
@@ -160,6 +162,10 @@ public:
 
   auto &randomSeed() {
     return RandomSeed;
+  }
+
+  auto &rttiNamespaces() {
+    return RttiNamespaces;
   }
 
   static std::shared_ptr<ObfuscationOptions> readConfigFile(
